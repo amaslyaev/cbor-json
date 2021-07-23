@@ -1,0 +1,311 @@
+{
+    "#1": "Test cases for automated tests, and also examples of json representation of non-standard data types",
+    "#2": "Fields:",
+    "#3": " - data - 'jsonable' value",
+    "#4": " - cbor - expected encoding to CBOR (hex format)",
+    "#5": " - assert - if 'native' form differs from 'jsonable', testing condition is defined here",
+    "null": {
+        "data": null,
+        "cbor": "f6"
+    },
+    "undefined": {
+        "data": {
+            "$type": "undefined"
+        },
+        "cbor": "f7",
+        "assert": "native == cbor2.undefined"
+    },
+    "bool-false": {
+        "data": false,
+        "cbor": "f4"
+    },
+    "bool-true": {
+        "data": true,
+        "cbor": "f5"
+    },
+    "str": {
+        "data": "Hello",
+        "cbor": "6548656c6c6f"
+    },
+    "int": {
+        "data": 12345678901234567890,
+        "cbor": "1bab54a98ceb1f0ad2"
+    },
+    "float-1": {
+        "data": 123.4567,
+        "cbor": "fb405edd3a92a30553"
+    },
+    "float-nan": {
+        "data": NaN,
+        "cbor": "f97e00",
+        "assert": "math.isnan(native)"
+    },
+    "float-inf": {
+        "data": Infinity,
+        "cbor": "f97c00"
+    },
+    "float-minus-inf": {
+        "data": -Infinity,
+        "cbor": "f9fc00"
+    },
+    "fraction": {
+        "data": {
+            "$type": "fraction",
+            "$value": "3/9"
+        },
+        "cbor": "d81e820103",
+        "assert": "native == fractions.Fraction(1, 3)"
+    },
+    "decimal": {
+        "data": {
+            "$type": "decimal",
+            "$value": "-12.345600"
+        },
+        "cbor": "c482253a00bc60ff",
+        "assert": "native.as_tuple() == decimal.Decimal('-12.345600').as_tuple()"
+    },
+    "bytes-1": {
+        "data": {
+            "$type": "binary-base64",
+            "$value": "SGVsbG8="
+        },
+        "cbor": "4548656c6c6f",
+        "assert": "native == b'Hello'"
+    },
+    "bytes-2": {
+        "data": {
+            "$type": "binary-hex",
+            "$value": "5d6d27060faf393b8c67f535"
+        },
+        "cbor": "4c5d6d27060faf393b8c67f535",
+        "assert": "native == bytes.fromhex('5d6d27060faf393b8c67f535')"
+    },
+    "bytes-3": {
+        "data": {
+            "$type": "binary-base64",
+            "$value": "U29tZSBiaW5hcnkgc3RyaW5nIG1vcmUgdGhhbiAzMiBieXRlcw=="
+        },
+        "cbor": "5825536f6d652062696e61727920737472696e67206d6f7265207468616e203332206279746573",
+        "assert": "native == b'Some binary string more than 32 bytes'"
+    },
+    "bytes-empty": {
+        "data": {
+            "$type": "binary-base58",
+            "$value": ""
+        },
+        "cbor": "40",
+        "assert": "native == b''"
+    },
+    "list": {
+        "data": [1, 1, 2, 3, 5, 8, 13],
+        "cbor": "870101020305080d"
+    },
+    "dict-1": {
+        "data": {
+            "firstname": "John",
+            "lastname": "Doe",
+            "birthyear": 1991
+        },
+        "cbor": "a3686c6173746e616d6563446f65696269727468796561721907c76966697273746e616d65644a6f686e"
+    },
+    "dict-2": {
+        "data": {
+            "$type": "map",
+            "$value": [
+                ["$type", "Employee"],
+                ["firstname", "John"],
+                ["lastname", "Doe"],
+                ["birthyear", 1991]
+            ]
+        },
+        "cbor": "a465247479706568456d706c6f796565686c6173746e616d6563446f65696269727468796561721907c76966697273746e616d65644a6f686e",
+        "assert": "native == {'$type': 'Employee', 'firstname': 'John', 'lastname': 'Doe', 'birthyear': 1991}"
+    },
+    "dict-3": {
+        "data": {
+            "$type": "map",
+            "$value": [
+                [[1, 2, 3], "123"],
+                [4, "four"],
+                [{"five": 5, "six": 6}, "56"]
+            ]
+        },
+        "cbor": "a30464666f75728301020363313233a26373697806646669766505623536",
+        "assert": "native == {(1, 2, 3): '123', 4: 'four', cbor2.types.FrozenDict({'six': 6, 'five': 5}): '56'}"
+    },
+    "set": {
+        "data": {
+            "$type": "set",
+            "$value": [
+                1,
+                "abcd",
+                [2, 3, 4],
+                {"e": 5},
+                {"$type": "set", "$value": ["f", 6]}
+            ]
+        },
+        "cbor": "d90102850183020304a16165056461626364d9010282066166",
+        "assert": "native == {1, 'abcd', (2, 3, 4), cbor2.types.FrozenDict({'e': 5}), frozenset({'f', 6})}"
+    },
+    "cbor-simple-value": {
+        "data": {
+            "$type": "cbor-simple-value",
+            "$value": 123
+        },
+        "cbor": "f87b",
+        "assert": "isinstance(native, cbor2.CBORSimpleValue) and native.value == 123"
+    },
+    "uuid": {
+        "data": {
+            "$type": "uuid",
+            "$value": "4a0e54ee-fce7-446b-90fa-2ffbfd3cc454"
+        },
+        "cbor": "d825504a0e54eefce7446b90fa2ffbfd3cc454",
+        "assert": "native == uuid.UUID('4a0e54ee-fce7-446b-90fa-2ffbfd3cc454')"
+    },
+    "custom-object-1": {
+        "data": {
+            "$type": "custom-object",
+            "$class": "Example 1 (event, date)",
+            "$class_tag": "e1",
+            "$value": [
+                "start",
+                {"$type": "date", "$value": "2021-05-12"}
+            ]
+        },
+        "cbor": "d81b83626531657374617274d864194947",
+        "assert": "isinstance(native, Example1) and native.event == 'start' and native.date == date(2021, 5, 12)"
+    },
+    "custom-object-2": {
+        "data": {
+            "$type": "custom-object",
+            "$class": "Example 2 (event, date, result)",
+            "$class_tag": "e2",
+            "$value": [
+                "start",
+                {"$type": "date", "$value": "2021-05-12"},
+                null
+            ]
+        },
+        "cbor": "d81b84626532657374617274d864194947f6",
+        "assert": "isinstance(native, UnrecognizedCustomObject) and native.class_tag == 'e2' and native.value == ['start', date(2021, 5, 12), None]"
+    },
+    "date-1": {
+        "data": {
+            "$type": "date",
+            "$value": "2021-01-23"
+        },
+        "cbor": "d8641948da",
+        "assert": "native == date(2021, 1, 23)"
+    },
+    "date-2": {
+        "data": {
+            "$type": "date",
+            "$value": "1890-03-21"
+        },
+        "cbor": "d8643971d3",
+        "assert": "native == date(1890, 3, 21)"
+    },
+    "datetime-1": {
+        "data": {
+            "$type": "datetime",
+            "$value": "2021-01-20T12:34:56.789012"
+        },
+        "cbor": "c1fb41d80208dc327f2c",
+        "assert": "native == datetime(2021, 1, 20, 12, 34, 56, 789012, tzinfo=timezone.utc)"
+    },
+    "datetime-2": {
+        "data": {
+            "$type": "datetime",
+            "$value": "2021-01-20T12:34:56.789012+00:00"
+        },
+        "cbor": "c1fb41d80208dc327f2c",
+        "assert": "native == datetime(2021, 1, 20, 12, 34, 56, 789012, tzinfo=timezone.utc)"
+    },
+    "datetime-3": {
+        "data": {
+            "$type": "datetime",
+            "$value": "2021-01-20T12:34:56.789012+01:00"
+        },
+        "cbor": "c1fb41d8020558327f2c",
+        "assert": "native == datetime(2021, 1, 20, 11, 34, 56, 789012, tzinfo=timezone.utc)"
+    },
+    "datetime-4": {
+        "data": {
+            "$type": "datetime",
+            "$value": "2021-01-20T12:34:56.789012-07:00"
+        },
+        "cbor": "c1fb41d8022178327f2c",
+        "assert": "native == datetime(2021, 1, 20, 19, 34, 56, 789012, tzinfo=timezone.utc)"
+    },
+    "datetime-5": {
+        "data": {
+            "$type": "datetime",
+            "$value": "2021-01-20T00:00:00"
+        },
+        "cbor": "c11a60077280",
+        "assert": "native == datetime(2021, 1, 20, tzinfo=timezone.utc)"
+    },
+    "tagged-value-1": {
+        "data": {
+            "$type": "tagged-value",
+            "$cbor_tag": 12345,
+            "$value": "some data"
+        },
+        "cbor": "d9303969736f6d652064617461",
+        "assert": "native == cbor2.CBORTag(12345, 'some data')"
+    },
+    "tagged-value-2": {
+        "data": {
+            "$type": "tagged-value",
+            "$cbor_tag": 12346,
+            "$value": [
+                1,
+                "abc",
+                {"def": 3},
+                [4, 5, 6],
+                {
+                    "$type": "datetime",
+                    "$value": "2021-01-20T12:34:56.789012"
+                }
+            ]
+        },
+        "cbor": "d9303a850163616263a1636465660383040506c1fb41d80208dc327f2c",
+        "assert": "native == cbor2.CBORTag(12346, [1, 'abc', {'def': 3}, [4, 5, 6], datetime(2021, 1, 20, 12, 34, 56, 789012, tzinfo=timezone.utc)])"
+    },
+    "dataframe": {
+        "data": {
+            "$type": "custom-object",
+            "$class": "DataFrame (columns, data)",
+            "$class_tag": "df",
+            "$value": [
+                [
+                    "x",
+                    "x+1"
+                ],
+                [
+                    [0, 1],
+                    [1, 2],
+                    [2, 3]
+                ]
+            ]
+        },
+        "cbor": "d81b8362646682617863782b3183820001820102820203",
+        "assert": "custom_objects.DataFrameSerialized(pd.DataFrame(native.columns_data())).rows_data() == [{'x': 0, 'x+1': 1}, {'x': 1, 'x+1': 2}, {'x': 2, 'x+1': 3}]"
+    },
+    "hash-sha3-224": {
+        "data": {
+            "$type": "custom-object",
+            "$class": "SHA3-224 hash (digest)",
+            "$class_tag": "#",
+            "$value": [
+                {
+                    "$type": "binary-base58",
+                    "$value": "4RdPL9czuqdDrxK3NBeAfnyg2mv2WNdsfxpsw3E"
+                }
+            ]
+        },
+        "cbor": "d81b826123581c4cf679344af02c2b89e4a902f939f4608bcac0fbf81511da13d7d9b9",
+        "assert": "native == custom_objects.HashSha3_224(b'Hello')"
+    }
+}
