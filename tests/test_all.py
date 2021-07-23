@@ -8,10 +8,12 @@ import decimal  # noqa: F401
 import math  # noqa: F401
 import uuid  # noqa: F401
 import fractions  # noqa: F401
-import cbor2  # noqa: F401
+import re  # noqa: F401
+import ipaddress  # noqa: F401
 
 import pytest
-import pandas as pd  # noqa: F401
+import pandas as pd
+import cbor2  # noqa: F401
 
 from cbor_json import cbor_from_jsonable, jsonable_from_cbor, \
     native_from_jsonable, native_from_cbor, cbor_from_native, jsonable_from_native, \

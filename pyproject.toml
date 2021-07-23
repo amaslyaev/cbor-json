@@ -2,7 +2,7 @@
 name = "cbor-json"
 #module = "cbor_json"
 #dist-name = "cbor-json"
-version = "0.0.2"
+version = "0.0.3"
 description = "Three-way conversion between 'native' Python data representation, CBOR, and JSON"
 authors = ["Alexander Maslyeav <maslyaev@gmail.com>"]
 license = "MIT"
@@ -14,7 +14,7 @@ keywords = []
 classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Intended Audience :: Developers",
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Programming Language :: Python :: 3"
 ]
 

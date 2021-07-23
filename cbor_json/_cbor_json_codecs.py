@@ -7,6 +7,9 @@ import base64
 from uuid import UUID
 from fractions import Fraction
 import decimal
+import re
+from ipaddress import IPv4Address, IPv4Network, IPv6Address, IPv6Network
+from email.message import Message
 
 import cbor2
 
@@ -46,8 +49,9 @@ def _transform_collection(src, encountered_ids, conv_func):
 
 def _cborable_from_native(native, encountered_ids=None):
     if native is None or native == cbor2.undefined \
-       or isinstance(native, (str, int, float, bool, datetime, bytes,
-                              Fraction, decimal.Decimal, UUID, cbor2.CBORSimpleValue)):
+       or isinstance(native, (str, int, float, bool, datetime, bytes, re.Pattern,
+                              Fraction, decimal.Decimal, UUID, cbor2.CBORSimpleValue,
+                              IPv4Address, IPv4Network, IPv6Address, IPv6Network, Message)):
         return native
     if isinstance(native, date):
         return cbor2.CBORTag(100, (native - date(1970, 1, 1)).days)
@@ -90,8 +94,9 @@ def _cborable_from_native(native, encountered_ids=None):
 
 def _native_from_cborable(cborable, encountered_ids=None):
     if cborable is None or cborable == cbor2.undefined \
-       or isinstance(cborable, (str, int, float, bool, datetime, bytes,
-                                Fraction, decimal.Decimal, UUID, cbor2.CBORSimpleValue)):
+       or isinstance(cborable, (str, int, float, bool, datetime, bytes, re.Pattern,
+                                Fraction, decimal.Decimal, UUID, cbor2.CBORSimpleValue,
+                                IPv4Address, IPv4Network, IPv6Address, IPv6Network)):
         return cborable
 
     if encountered_ids is None:
@@ -132,6 +137,12 @@ def _native_from_cborable(cborable, encountered_ids=None):
                 )
         else:
             res = _transform_collection(cborable, encountered_ids, _native_from_cborable)
+    elif isinstance(cborable, Message):
+        payload = cborable.as_bytes()
+        while payload and payload[:len(b'\n')] == b'\n':
+            payload = payload[len(b'\n'):]
+        res = Message()
+        res.set_payload(payload)
     else:
         raise ValueError(f'Cannot convert {type(cborable).__name__} to native format')
 
@@ -203,6 +214,23 @@ def _cborable_from_jsonable(jsonable, enforce_object: bool = False):
                     int(jsonable['$value'][sep_pos+1:]))
             if val_type == 'decimal':
                 return decimal.Decimal(jsonable['$value'])
+            if val_type == 'regex':
+                return re.compile(jsonable['$value'])
+            if val_type == 'ipv4-address':
+                return IPv4Address(jsonable['$value'])
+            if val_type == 'ipv4-network':
+                return IPv4Network(jsonable['$value'])
+            if val_type == 'ipv6-address':
+                return IPv6Address(jsonable['$value'])
+            if val_type == 'ipv6-network':
+                return IPv6Network(jsonable['$value'])
+            if val_type == 'mime':
+                res = Message()
+                payload = base64.decodebytes(jsonable['$value'].encode())
+                while payload and payload[:len(b'\n')] == b'\n':
+                    payload = payload[len(b'\n'):]
+                res.set_payload(payload)
+                return res
             if val_type == 'cbor-simple-value':
                 return cbor2.CBORSimpleValue(jsonable['$value'])
             if val_type == 'undefined':
@@ -272,6 +300,24 @@ def _jsonable_from_cborable(cborable):
     if isinstance(cborable, decimal.Decimal):
         return {'$type': 'decimal',
                 '$value': str(cborable)}
+    if isinstance(cborable, re.Pattern):
+        return {'$type': 'regex',
+                '$value': cborable.pattern}
+    if isinstance(cborable, IPv4Address):
+        return {'$type': 'ipv4-address',
+                '$value': str(cborable)}
+    if isinstance(cborable, IPv4Network):
+        return {'$type': 'ipv4-network',
+                '$value': str(cborable)}
+    if isinstance(cborable, IPv6Address):
+        return {'$type': 'ipv6-address',
+                '$value': str(cborable)}
+    if isinstance(cborable, IPv6Network):
+        return {'$type': 'ipv6-network',
+                '$value': str(cborable)}
+    if isinstance(cborable, Message):
+        return {'$type': 'mime',
+                '$value': base64.encodebytes(cborable.as_bytes()).decode().rstrip('\n')}
     if isinstance(cborable, cbor2.CBORSimpleValue):
         return {'$type': 'cbor-simple-value',
                 '$value': cborable.value}

@@ -273,6 +273,54 @@
         "cbor": "d9303a850163616263a1636465660383040506c1fb41d80208dc327f2c",
         "assert": "native == cbor2.CBORTag(12346, [1, 'abc', {'def': 3}, [4, 5, 6], datetime(2021, 1, 20, 12, 34, 56, 789012, tzinfo=timezone.utc)])"
     },
+    "regex-pattern": {
+        "data": {
+            "$type": "regex",
+            "$value": "Hi .*\\."
+        },
+        "cbor": "d823674869202e2a5c2e",
+        "assert": "native == re.compile(r'Hi .*\\.')"
+    },
+    "ipv4-address": {
+        "data": {
+            "$type": "ipv4-address",
+            "$value": "127.0.0.1"
+        },
+        "cbor": "d90104447f000001",
+        "assert": "native == ipaddress.IPv4Address('127.0.0.1')"
+    },
+    "ipv4-network": {
+        "data": {
+            "$type": "ipv4-network",
+            "$value": "127.0.0.1/32"
+        },
+        "cbor": "d90105a1447f0000011820",
+        "assert": "native == ipaddress.IPv4Network('127.0.0.1/32')"
+    },
+    "ipv6-address": {
+        "data": {
+            "$type": "ipv6-address",
+            "$value": "2001:db8::1"
+        },
+        "cbor": "d901045020010db8000000000000000000000001",
+        "assert": "native == ipaddress.IPv6Address('2001:db8::1')"
+    },
+    "ipv6-network": {
+        "data": {
+            "$type": "ipv6-network",
+            "$value": "2001:db00::0/24"
+        },
+        "cbor": "d90105a1502001db000000000000000000000000001818",
+        "assert": "native == ipaddress.IPv6Network('2001:db00::0/24')"
+    },
+    "mime": {
+        "data": {
+            "$type": "mime",
+            "$value": "Ck1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD0idXRm\nLTgiCkNvbnRlbnQtVHJhbnNmZXItRW5jb2Rpbmc6IGJhc2U2NAoKQSBsb25nIHNhZCBzdG9yeS4u\nLg=="
+        },
+        "cbor": "d82478730a4d494d452d56657273696f6e3a20312e300a436f6e74656e742d547970653a20746578742f706c61696e3b20636861727365743d227574662d38220a436f6e74656e742d5472616e736665722d456e636f64696e673a206261736536340a0a41206c6f6e67207361642073746f72792e2e2e",
+        "assert": "native.as_bytes() == b'\\nMIME-Version: 1.0\\nContent-Type: text/plain; charset=\"utf-8\"\\nContent-Transfer-Encoding: base64\\n\\nA long sad story...'"
+    },
     "dataframe": {
         "data": {
             "$type": "custom-object",
