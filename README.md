@@ -1,6 +1,5 @@
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/cbor-json.svg)](https://pypi.python.org/pypi/cbor-json/)
 [![PyPI status](https://img.shields.io/pypi/status/cbor-json.svg)](https://pypi.python.org/pypi/cbor-json/)
-[![Coverage](https://github.com/amaslyaev/cbor-json/blob/master/.github/coverage.svg)](https://pypi.python.org/pypi/cbor-json/)
 [![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/amaslyaev/cbor-json/blob/master/LICENSE)
 
 # cbor-json
