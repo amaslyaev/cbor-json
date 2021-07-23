@@ -1,3 +1,5 @@
+[![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/amaslyaev/cbor-json/blob/master/LICENSE)
+
 # cbor-json
 
 This library provides three-way conversion between "native" Python data representation, [CBOR](https://cbor.io/) (Concise Binary Object Representation), and human- and machine-readable JSON (and also YAML, TOML, etc.) form.
