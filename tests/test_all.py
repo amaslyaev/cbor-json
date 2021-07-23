@@ -1,3 +1,5 @@
+import sys
+from pathlib import Path
 import json
 import base64
 from datetime import datetime
@@ -13,12 +15,14 @@ import cbor2  # noqa: F401
 import pytest
 import pandas as pd  # noqa: F401
 
-from cbor_json import cbor_from_jsonable, jsonable_from_cbor, \
-    native_from_jsonable, native_from_cbor, cbor_from_native, jsonable_from_native, \
-    SerializableToCbor, register_custom_class
-from cbor_json._cbor_json_codecs import _native_from_cborable, _transform_collection
-from cbor_json import custom_objects
-from cbor_json import UnrecognizedCustomObject  # noqa: F401
+sys.path.append(Path(".").absolute())
+if True:
+    from cbor_json import cbor_from_jsonable, jsonable_from_cbor, \
+        native_from_jsonable, native_from_cbor, cbor_from_native, jsonable_from_native, \
+        SerializableToCbor, register_custom_class
+    from cbor_json._cbor_json_codecs import _native_from_cborable, _transform_collection
+    from cbor_json import custom_objects
+    from cbor_json import UnrecognizedCustomObject  # noqa: F401
 
 
 def test_vectors():
