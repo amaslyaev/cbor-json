@@ -179,7 +179,7 @@ def _cborable_from_jsonable(jsonable, enforce_object: bool = False):
             if val_type == 'binary-hex':
                 return bytes.fromhex(jsonable['$value'])
             if val_type == 'binary-base58':
-                return _base58_decode(jsonable['$value'])
+                return base58_decode(jsonable['$value'])
             if val_type == 'binary-base64':
                 return base64.decodebytes(jsonable['$value'].encode())
             if val_type == 'custom-object':
@@ -266,7 +266,7 @@ def _jsonable_from_cborable(cborable):
                     '$value': cborable.hex()}
         if len(cborable) <= 32:
             return {'$type': 'binary-base58',
-                    '$value': _base58_encode(cborable)}
+                    '$value': base58_encode(cborable)}
         return {'$type': 'binary-base64',
                 '$value': base64.encodebytes(cborable).decode().rstrip('\n')}
     if isinstance(cborable, cbor2.CBORTag):
@@ -395,7 +395,7 @@ _BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 _BASE58_ALPHA_IDXS = {a: i for i, a in enumerate(_BASE58_ALPHABET)}
 
 
-def _base58_encode(decoded: bytes) -> str:
+def base58_encode(decoded: bytes) -> str:
     """
     Returns base58-encoded string. Using Bitcoin alphabet.
     :param decoded: bytes-like object to encode.
@@ -410,7 +410,7 @@ def _base58_encode(decoded: bytes) -> str:
     return ''.join(reversed(chrs))
 
 
-def _base58_decode(encoded: str) -> bytes:
+def base58_decode(encoded: str) -> bytes:
     """
     Decodes base58-encoded string and returns bytes. Using Bitcoin alphabet.
     :param encoded: string to decode.

@@ -2,7 +2,7 @@
 name = "cbor-json"
 #module = "cbor_json"
 #dist-name = "cbor-json"
-version = "0.0.3"
+version = "0.0.4"
 description = "Three-way conversion between 'native' Python data representation, CBOR, and JSON"
 authors = ["Alexander Maslyeav <maslyaev@gmail.com>"]
 license = "MIT"
