@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        python-version: [3.9, 3.10, 3.11, 3.12, 3.13]
 
     steps:
       - uses: actions/checkout@v2
@@ -29,4 +29,11 @@ jobs:
           flake8 cbor_json --count --exit-zero --max-line-length=100 --statistics
       - name: Test with pytest
         run: |
-          pytest --junitxml=junit/test-results.xml --cov=cbor_json --cov-report=xml --cov-report=html
+          export PYTHONPATH=$(pwd) && pytest --junitxml=junit/test-results.xml --cov=cbor_json --cov-report=xml --cov-report=html
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+      - name: Test with mypy
+        run: |
+          mypy cbor_json

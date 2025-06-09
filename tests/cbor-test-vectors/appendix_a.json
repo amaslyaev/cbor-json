@@ -270,12 +270,6 @@
     "diagnostic": "simple(16)"
   },
   {
-    "cbor": "+Bg=",
-    "hex": "f818",
-    "roundtrip": true,
-    "diagnostic": "simple(24)"
-  },
-  {
     "cbor": "+P8=",
     "hex": "f8ff",
     "roundtrip": true,

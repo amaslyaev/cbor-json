@@ -131,7 +131,7 @@
             ]
         },
         "cbor": "a30464666f75728301020363313233a26373697806646669766505623536",
-        "assert": "native == {(1, 2, 3): '123', 4: 'four', cbor2.types.FrozenDict({'six': 6, 'five': 5}): '56'}"
+        "assert": "native == {(1, 2, 3): '123', 4: 'four', cbor2.FrozenDict({'six': 6, 'five': 5}): '56'}"
     },
     "set": {
         "data": {
@@ -145,7 +145,7 @@
             ]
         },
         "cbor": "d90102850183020304a16165056461626364d9010282066166",
-        "assert": "native == {1, 'abcd', (2, 3, 4), cbor2.types.FrozenDict({'e': 5}), frozenset({'f', 6})}"
+        "assert": "native == {1, 'abcd', (2, 3, 4), cbor2.FrozenDict({'e': 5}), frozenset({'f', 6})}"
     },
     "cbor-simple-value": {
         "data": {
@@ -188,7 +188,7 @@
             ]
         },
         "cbor": "d81b84626532657374617274d864194947f6",
-        "assert": "isinstance(native, UnrecognizedCustomObject) and native.class_tag == 'e2' and native.value == ['start', date(2021, 5, 12), None]"
+        "assert": "isinstance(native, UnrecognizedCustomObject) and native.cbor_cc_classtag == 'e2' and native.value == ['start', date(2021, 5, 12), None]"
     },
     "date-1": {
         "data": {
