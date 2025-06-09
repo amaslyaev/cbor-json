@@ -90,7 +90,7 @@
     },
     "bytes-empty": {
         "data": {
-            "$type": "binary-base58",
+            "$type": "binary-b58",
             "$value": ""
         },
         "cbor": "40",
@@ -348,8 +348,8 @@
             "$class_tag": "#",
             "$value": [
                 {
-                    "$type": "binary-base58",
-                    "$value": "4RdPL9czuqdDrxK3NBeAfnyg2mv2WNdsfxpsw3E"
+                    "$type": "binary-b58",
+                    "$value": "nutDKqH3B12wfrWz4hFAiEbhouPSA8yRrFMXDi"
                 }
             ]
         },

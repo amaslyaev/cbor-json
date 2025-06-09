@@ -10,8 +10,10 @@ import decimal
 import re
 from ipaddress import IPv4Address, IPv4Network, IPv6Address, IPv6Network
 from email.message import Message
+from warnings import warn
 
 import cbor2
+import base58
 
 from ._custom_objects_base import (
     SerializableToCbor,
@@ -20,7 +22,7 @@ from ._custom_objects_base import (
 )
 
 
-# ---------------- native <--> cborable conversions ----------------
+# MARK: Native<->CBORable
 
 
 def _transform_collection(src, encountered_ids, conv_func):
@@ -50,6 +52,9 @@ def _transform_collection(src, encountered_ids, conv_func):
         raise ValueError(f"Convestion for {type(src).__name__} is not implemented")
 
     return res
+
+
+# MARK: Native->CBORable
 
 
 def _cborable_from_native(native, encountered_ids=None):
@@ -108,7 +113,7 @@ def _cborable_from_native(native, encountered_ids=None):
         if isinstance(native, SerializableToCbor):
             values = [
                 _cborable_from_native(el, encountered_ids)
-                for el in native.get_cbor_cc_values()
+                for el in native.get_cbor_cc_values() or []
             ]
             res = cbor2.CBORTag(
                 27,  # http://cbor.schmorp.de/generic-object
@@ -129,6 +134,9 @@ def _cborable_from_native(native, encountered_ids=None):
     if this_id is not None:
         encountered_ids.remove(this_id)
     return res
+
+
+# MARK: CBORable->Native
 
 
 def _native_from_cborable(cborable, encountered_ids=None):
@@ -215,7 +223,7 @@ def _native_from_cborable(cborable, encountered_ids=None):
     return res
 
 
-# ---------------- jsonable <--> cborable conversions ----------------
+# MARK: JSON<->CBOR
 
 
 def _freeze(val):
@@ -226,6 +234,9 @@ def _freeze(val):
     if isinstance(val, dict):
         return cbor2.FrozenDict({_freeze(k): _freeze(v) for k, v in val.items()})
     return val
+
+
+# MARK: JSONable->CBORable
 
 
 def _cborable_from_jsonable(jsonable, enforce_object: bool = False):
@@ -245,8 +256,10 @@ def _cborable_from_jsonable(jsonable, enforce_object: bool = False):
                 return cbor2.CBORTag(100, val_as_int)
             if val_type == "binary-hex":
                 return bytes.fromhex(jsonable["$value"])
-            if val_type == "binary-base58":
-                return base58_decode(jsonable["$value"])
+            if val_type == "binary-base58":  # deprecated
+                return base58_decode(jsonable["$value"])  # pragma: no cover
+            if val_type == "binary-b58":
+                return base58.b58decode(jsonable["$value"])
             if val_type == "binary-base64":
                 return base64.decodebytes(jsonable["$value"].encode())
             if val_type == "custom-object":
@@ -317,6 +330,9 @@ def _cborable_from_jsonable(jsonable, enforce_object: bool = False):
     raise TypeError(f"Value of type {type(jsonable).__name__} is not JSONable")
 
 
+# MARK: CBORable->JSONable
+
+
 def _jsonable_from_cborable(cborable):
     if isinstance(cborable, list):
         return [_jsonable_from_cborable(el) for el in cborable]
@@ -345,7 +361,10 @@ def _jsonable_from_cborable(cborable):
         if len(cborable) <= 16:
             return {"$type": "binary-hex", "$value": cborable.hex()}
         if len(cborable) <= 32:
-            return {"$type": "binary-base58", "$value": base58_encode(cborable)}
+            return {
+                "$type": "binary-b58",
+                "$value": base58.b58encode(cborable).decode(),
+            }
         return {
             "$type": "binary-base64",
             "$value": base64.encodebytes(cborable).decode().rstrip("\n"),
@@ -411,7 +430,7 @@ def _jsonable_from_cborable(cborable):
     return cborable
 
 
-# ---------------- native <--> jsonable conversions ----------------
+# MARK: Native->JSONable
 
 
 def jsonable_from_native(native):
@@ -422,6 +441,9 @@ def jsonable_from_native(native):
     return _jsonable_from_cborable(_cborable_from_native(native))
 
 
+# MARK: JSONable->Native
+
+
 def native_from_jsonable(jsonable):
     """
     :param native: 'jsonable' data to convert to native form
@@ -430,7 +452,7 @@ def native_from_jsonable(jsonable):
     return _native_from_cborable(_cborable_from_jsonable(jsonable))
 
 
-# ---------------- native <--> cbor conversions ----------------
+# MARK: Native->CBOR
 
 
 def cbor_from_native(native) -> bytes:
@@ -446,6 +468,9 @@ def cbor_from_native(native) -> bytes:
     )
 
 
+# MARK: CBOR->Native
+
+
 def native_from_cbor(data: bytes):
     """
     :param native: CBOR bytes
@@ -454,7 +479,7 @@ def native_from_cbor(data: bytes):
     return _native_from_cborable(cbor2.loads(data))
 
 
-# ---------------- jsonable <--> cbor conversions ----------------
+# MARK: JSONable->CBOR
 
 
 def cbor_from_jsonable(jsonable) -> bytes:
@@ -470,6 +495,9 @@ def cbor_from_jsonable(jsonable) -> bytes:
     )
 
 
+# MARK: CBOR->JSONable
+
+
 def jsonable_from_cbor(data: bytes):
     """
     :param native: CBOR bytes
@@ -478,20 +506,22 @@ def jsonable_from_cbor(data: bytes):
     return _jsonable_from_cborable(cbor2.loads(data))
 
 
-# ---------------- base58 coding/decoding ----------------
-# Details: https://en.wikipedia.org/wiki/Base58
+# MARK: Deprecated b58
 
 _BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
 _BASE58_ALPHA_IDXS = {a: i for i, a in enumerate(_BASE58_ALPHABET)}
 
 
-def base58_encode(decoded: bytes) -> str:
+def base58_encode(decoded: bytes) -> str:  # pragma: no cover
     """
+    DEPRECATED
+
     Returns base58-encoded string. Using Bitcoin alphabet.
     :param decoded: bytes-like object to encode.
     :return: base58 representation of b'\x01' + decoded (to make a difference
         between 0xabcd and 0x000000abcd.)
     """
+    warn(DeprecationWarning("cbor_json.base58_encode is deprecated"))
     int_v = int.from_bytes(b"\x01" + decoded, byteorder="big")
     chrs = []
     while int_v:
@@ -500,8 +530,10 @@ def base58_encode(decoded: bytes) -> str:
     return "".join(reversed(chrs))
 
 
-def base58_decode(encoded: str) -> bytes:
+def base58_decode(encoded: str) -> bytes:  # pragma: no cover
     """
+    DEPRECATED, but will reteined forever for the sake of backward compatibility.
+
     Decodes base58-encoded string and returns bytes. Using Bitcoin alphabet.
     :param encoded: string to decode.
     :return: decoded bytes. Throws away first byte (see base58_encode description).
