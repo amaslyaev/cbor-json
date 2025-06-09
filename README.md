@@ -9,7 +9,7 @@
 This library provides three-way conversion between "native" Python data representation, [CBOR](https://cbor.io/) (Concise Binary Object Representation), and human- and machine-readable JSON (and also YAML, TOML, etc.) form.
 
 ## Installation and import
-You need at least Python 3.9 to use this library
+You need at least Python 3.10 to use this library
 ```shell
 pip install cbor-json
 ```
