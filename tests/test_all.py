@@ -1,4 +1,3 @@
-import logging  ####_
 import json
 import base64
 from datetime import datetime
@@ -116,7 +115,6 @@ def test_jsons():
 
     passed = True
     for case_name, case_data in ext_jsons.items():
-        logging.warning(f"*** {case_name=}")  ####_
         if isinstance(case_data, str):
             continue
 
@@ -182,8 +180,6 @@ def test_jsons():
             passed = False
 
         jsonable3 = jsonable_from_cbor(cbor1_b)
-        if case_name == "custom-object-1":
-            logging.warning(f"*** {jsonable3=}")  ####_
         native2 = native_from_jsonable(jsonable3)
         cbor3_b = cbor_from_native(native2)
 
