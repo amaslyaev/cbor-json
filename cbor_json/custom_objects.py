@@ -12,25 +12,33 @@ Predefined serializable object classes:
 """
 
 from abc import abstractmethod as _abstractmethod
-from hashlib import sha1 as _sha1, sha256 as _sha256, \
-    sha3_224 as _sha3_224, sha3_256 as _sha3_256, md5 as _md5
+from hashlib import (
+    sha1 as _sha1,
+    sha256 as _sha256,
+    sha3_224 as _sha3_224,
+    sha3_256 as _sha3_256,
+    md5 as _md5,
+)
 from zlib import crc32 as _crc32
 from typing import Dict as _Dict, List as _List
 
-from ._custom_objects_base import SerializableToCbor as _SerializableToCbor, \
-    register_custom_class as _register_custom_class
+from ._custom_objects_base import (
+    SerializableToCbor as _SerializableToCbor,
+    register_custom_class as _register_custom_class,
+)
 
 
 # ---------------- Hashes ----------------
 
+
 class _HashBase(_SerializableToCbor):
-    def __init__(self, data: bytes = None, digest: bytes = None):
+    def __init__(self, data: bytes | None = None, digest: bytes | None = None):
         """
         :param data: data to be hashed
         :param digest: calculated hash, used if parameter data is None
         """
-        self.digest = None
-        self._hash = None
+        self.digest: bytes | None = None
+        self._hash: int | None = None
         if data is not None:
             self.calculate(data)
         elif digest is not None:
@@ -44,10 +52,12 @@ class _HashBase(_SerializableToCbor):
         """
 
     def get_cbor_cc_values(self) -> list:
-        return [self.digest, ]
+        return [
+            self.digest,
+        ]
 
-    def put_cbor_cc_values(self, digest):  # pylint: disable=W0221
-        self.digest = digest
+    def put_cbor_cc_values(self, *values):
+        self.digest = values[0]
 
     def __eq__(self, other):
         return isinstance(other, type(self)) and self.digest == other.digest
@@ -57,20 +67,21 @@ class _HashBase(_SerializableToCbor):
             if self.digest is not None:
                 self._hash = hash((self.cbor_cc_classtag, self.digest))
             else:
-                raise TypeError(f'Uninitialized {type(self).__name__} is unhashable')
+                raise TypeError(f"Uninitialized {type(self).__name__} is unhashable")
         return self._hash
 
     def __repr__(self):
         if self.digest is None:
-            return f'{type(self).__name__}()'
+            return f"{type(self).__name__}()"
         return f"{type(self).__name__}(digest=bytes.fromhex('{self.digest.hex()}'))"
 
 
-class HashSha3_224(_HashBase):  # pylint: disable=C0103
+class HashSha3_224(_HashBase):
     """
     CBOR- and JSON-serializable SHA3-224 hash
     """
-    cbor_cc_classtag = '#'
+
+    cbor_cc_classtag = "#"
     cbor_cc_descr = "SHA3-224 hash (digest)"
 
     def calculate(self, data: bytes):
@@ -81,7 +92,8 @@ class HashSha1(_HashBase):
     """
     CBOR- and JSON-serializable SHA1 hash
     """
-    cbor_cc_classtag = '#1'
+
+    cbor_cc_classtag = "#1"
     cbor_cc_descr = "SHA1 hash (digest)"
 
     def calculate(self, data: bytes):
@@ -92,18 +104,20 @@ class HashSha256(_HashBase):
     """
     CBOR- and JSON-serializable SHA-256 hash
     """
-    cbor_cc_classtag = '#2'
+
+    cbor_cc_classtag = "#2"
     cbor_cc_descr = "SHA-256 hash (digest)"
 
     def calculate(self, data: bytes):
         self.digest = _sha256(data).digest()
 
 
-class HashSha3_256(_HashBase):  # pylint: disable=C0103
+class HashSha3_256(_HashBase):
     """
     CBOR- and JSON-serializable SHA3-256 hash
     """
-    cbor_cc_classtag = '#3'
+
+    cbor_cc_classtag = "#3"
     cbor_cc_descr = "SHA3-256 hash (digest)"
 
     def calculate(self, data: bytes):
@@ -114,7 +128,8 @@ class HashMd5(_HashBase):
     """
     CBOR- and JSON-serializable MD5 hash
     """
-    cbor_cc_classtag = '#5'
+
+    cbor_cc_classtag = "#5"
     cbor_cc_descr = "MD5 hash (digest)"
 
     def calculate(self, data: bytes):
@@ -125,11 +140,12 @@ class HashCrc32(_HashBase):
     """
     CBOR- and JSON-serializable CRC32 checksum
     """
-    cbor_cc_classtag = '#0'
+
+    cbor_cc_classtag = "#0"
     cbor_cc_descr = "CRC32 hash (digest)"
 
     def calculate(self, data: bytes):
-        self.digest = _crc32(data).to_bytes(4, byteorder='big')
+        self.digest = _crc32(data).to_bytes(4, byteorder="big")
 
 
 _register_custom_class(HashSha3_224)
@@ -142,11 +158,13 @@ _register_custom_class(HashCrc32)
 
 # ---------------- pandas DataFrame ----------------
 
+
 class DataFrameSerialized(_SerializableToCbor):
     """
     Serialization to/from CBOR and JSON for pandas dataframe
     """
-    cbor_cc_classtag = 'df'
+
+    cbor_cc_classtag = "df"
     cbor_cc_descr = "DataFrame (columns, data)"
 
     def __init__(self, dataframe=None):
@@ -175,11 +193,14 @@ class DataFrameSerialized(_SerializableToCbor):
     def get_cbor_cc_values(self) -> list:
         return [self.columns, self.data]
 
-    def put_cbor_cc_values(self, columns: _List[str], data: _List[list]):  # pylint: disable=W0221
+    def put_cbor_cc_values(self, *values):
         """
         :param columns: list of column names
         :param data: list of rows; each row is a list of field values
         """
+        assert len(values) == 2
+        columns = values[0]
+        data = values[1]
         assert isinstance(columns, list)
         assert isinstance(data, list)
         assert all(isinstance(r, list) for r in data)
@@ -195,7 +216,9 @@ class DataFrameSerialized(_SerializableToCbor):
         """
         if self.columns is None:
             return {}
-        return {c: [r[cidx] for r in self.data] for cidx, c in enumerate(self.columns)}
+        return {
+            c: [r[cidx] for r in self.data or []] for cidx, c in enumerate(self.columns)
+        }
 
     def rows_data(self) -> _List[dict]:
         """
@@ -208,7 +231,9 @@ class DataFrameSerialized(_SerializableToCbor):
         """
         if self.columns is None:
             return []
-        return [{c: r[cidx] for cidx, c in enumerate(self.columns)} for r in self.data]
+        return [
+            {c: r[cidx] for cidx, c in enumerate(self.columns)} for r in self.data or []
+        ]
 
 
 _register_custom_class(DataFrameSerialized)

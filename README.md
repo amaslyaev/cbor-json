@@ -1,13 +1,15 @@
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/cbor-json.svg)](https://pypi.python.org/pypi/cbor-json/)
 [![PyPI status](https://img.shields.io/pypi/status/cbor-json.svg)](https://pypi.python.org/pypi/cbor-json/)
 [![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/amaslyaev/cbor-json/blob/master/LICENSE)
+[![Code style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black/)
+[Static Badge](https://img.shields.io/badge/AI--generated_code-0%25-lime)
 
 # cbor-json
 
 This library provides three-way conversion between "native" Python data representation, [CBOR](https://cbor.io/) (Concise Binary Object Representation), and human- and machine-readable JSON (and also YAML, TOML, etc.) form.
 
 ## Installation and import
-You need at least Python 3.6 to use this library
+You need at least Python 3.10 to use this library
 ```shell
 pip install cbor-json
 ```
@@ -211,15 +213,15 @@ Let's encode a pandas dataframe
 
 1. At the moment these class tags are in use:
 
-| class tag | class | Description |
-| :---:     | :---  |  :---       |
-| #   | cbor_json.custom_objects.HashSha3_224 | sha3_224 hash |
-| #1  | cbor_json.custom_objects.HashSha1     | sha1 hash |
-| #2  | cbor_json.custom_objects.HashSha256   | sha256 hash |
-| #3  | cbor_json.custom_objects.HashSha3_256 | sha3_256 hash |
-| #5  | cbor_json.custom_objects.HashMd5      | md5 hash |
-| #0  | cbor_json.custom_objects.HashCrc32    | crc32 checksum |
-| df  | cbor_json.custom_objects.DataFrameSerialized | pandas dataframe |
+| class tag | class                                        | Description      |
+| :-------: | :------------------------------------------- | :--------------- |
+|     #     | cbor_json.custom_objects.HashSha3_224        | sha3_224 hash    |
+|    #1     | cbor_json.custom_objects.HashSha1            | sha1 hash        |
+|    #2     | cbor_json.custom_objects.HashSha256          | sha256 hash      |
+|    #3     | cbor_json.custom_objects.HashSha3_256        | sha3_256 hash    |
+|    #5     | cbor_json.custom_objects.HashMd5             | md5 hash         |
+|    #0     | cbor_json.custom_objects.HashCrc32           | crc32 checksum   |
+|    df     | cbor_json.custom_objects.DataFrameSerialized | pandas dataframe |
 
 2. Keep class tags short.
 3. Tags of 1 and 2 characters long meant to be a subject of general consent. If you have an idea to add something undoubtedly useful, create an issue and/or a PR.

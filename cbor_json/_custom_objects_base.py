@@ -11,6 +11,7 @@ in the custom_objects.py module.
 """
 
 from abc import ABC, abstractmethod
+from typing import Type
 
 
 class SerializableToCbor(ABC):
@@ -19,8 +20,11 @@ class SerializableToCbor(ABC):
     In the implementation define cbor_cc_classtag, cbor_cc_descr,
     and implement get_cbor_cc_values and put_cbor_cc_values methods.
     """
-    cbor_cc_classtag = None  # Keep it short
-    cbor_cc_descr = None  # Good practice to specify parameters here. E.g. "Point (x, y)"
+
+    cbor_cc_classtag: str | None = None  # Keep it short
+    cbor_cc_descr: str | None = (
+        None  # Good practice to specify parameters here. E.g. "Point (x, y)"
+    )
 
     @classmethod
     def get_cbor_cc_descr(cls) -> str:
@@ -30,7 +34,7 @@ class SerializableToCbor(ABC):
         return cls.cbor_cc_descr or f'Object with class tag "{cls.cbor_cc_classtag}">'
 
     @abstractmethod
-    def get_cbor_cc_values(self) -> list:
+    def get_cbor_cc_values(self) -> list | None:
         """
         This function is used to serialize an object.
         Implement this function in your class. Return data as list of some values.
@@ -45,11 +49,11 @@ class SerializableToCbor(ABC):
         """
 
 
-CUSTOM_CLASSES_BY_CLASSTAG = {}
-CUSTOM_CLASTAGS_BY_CLASS = {}
+CUSTOM_CLASSES_BY_CLASSTAG: dict[str, Type[SerializableToCbor]] = {}
+CUSTOM_CLASTAGS_BY_CLASS: dict[Type[SerializableToCbor], str] = {}
 
 
-def register_custom_class(a_class: type):
+def register_custom_class(a_class: Type[SerializableToCbor]):
     """
     When serializable class is only declared, codec does not know about it yet. Use
     this function to register your class for the codec.
@@ -57,16 +61,22 @@ def register_custom_class(a_class: type):
     """
     if a_class not in CUSTOM_CLASTAGS_BY_CLASS:
         if not issubclass(a_class, SerializableToCbor):
-            raise ValueError(f'Class {a_class.__name__} is not a subclass of SerializableToCbor')
+            raise ValueError(
+                f"Class {a_class.__name__} is not a subclass of SerializableToCbor"
+            )
         if a_class.cbor_cc_classtag is None:
-            raise ValueError(f'Class tag is not defined for class {a_class.__name__}')
-        if a_class.cbor_cc_classtag.startswith('~'):
-            raise ValueError('Registering class tags that start with "~" sign is prohibited')
+            raise ValueError(f"Class tag is not defined for class {a_class.__name__}")
+        if a_class.cbor_cc_classtag.startswith("~"):
+            raise ValueError(
+                'Registering class tags that start with "~" sign is prohibited'
+            )
         classtag = a_class.cbor_cc_classtag
         if classtag in CUSTOM_CLASSES_BY_CLASSTAG:
             raise ValueError(
-                f'Cannot register {a_class.__name__} with class tag "{classtag}" because '
-                f'this tag is already used for {CUSTOM_CLASSES_BY_CLASSTAG[classtag].__name__}')
+                f'Cannot register {a_class.__name__} with class tag "{classtag}" '
+                "because this tag is already used "
+                f"for {CUSTOM_CLASSES_BY_CLASSTAG[classtag].__name__}"
+            )
 
         CUSTOM_CLASSES_BY_CLASSTAG[classtag] = a_class
         CUSTOM_CLASTAGS_BY_CLASS[a_class] = classtag
@@ -76,8 +86,9 @@ class UnrecognizedCustomObject(SerializableToCbor):
     """
     Used when unregistered class tag encountered.
     """
+
     def __init__(self):
-        self.class_tag = self.value = None
+        self.cbor_cc_classtag = self.value = None
 
     def get_cbor_cc_values(self):
         return self.value
