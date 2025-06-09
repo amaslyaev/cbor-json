@@ -2,7 +2,8 @@
 [![PyPI status](https://img.shields.io/pypi/status/cbor-json.svg)](https://pypi.python.org/pypi/cbor-json/)
 [![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/amaslyaev/cbor-json/blob/master/LICENSE)
 [![Code style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black/)
-[Static Badge](https://img.shields.io/badge/AI--generated_code-0%25-lime)
+[![codecov](https://codecov.io/gh/amaslyaev/cbor-json/graph/badge.svg?token=N635SL8HUR)](https://codecov.io/gh/amaslyaev/cbor-json)
+[![AI-gen code 0%](https://img.shields.io/badge/AI--generated_code-0%25-lime)](https://img.shields.io)
 
 # cbor-json
 
